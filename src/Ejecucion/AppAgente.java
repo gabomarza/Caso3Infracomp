@@ -64,7 +64,7 @@ public class AppAgente {
 	/**
 	 * Cambiarla cada vez que se cambie de computador
 	 */
-	public static final String DIRECCIONIP ="157.253.202.11";
+	public static final String DIRECCIONIP ="192.168.0.16";
 	private SecretKeySpec desKey;
 	private KeyPair keyPair;
 	private String mensActuRes;
@@ -129,7 +129,7 @@ public class AppAgente {
 			//java -jar servidorIC20161/servidorNSIC20161(dependiendo de cual servidor se quiere correr).jar
 			//Luego se da el puerto al cual se quiere que se conecte, que en este caso es el 1234
 			//Conecciones al servidor y buffreaders y printwriter stuff
-			socServ = new Socket("0", 1234);
+			socServ = new Socket("192.168.0.7", 8080);
 			escritor = new PrintWriter(socServ.getOutputStream(), true);
 			lector = new BufferedReader(new InputStreamReader( socServ.getInputStream()));
 			//Creacion de las llaves asimetricas del cliente
