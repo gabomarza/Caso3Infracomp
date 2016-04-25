@@ -4,6 +4,8 @@ package ServidorSeguro;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -12,6 +14,10 @@ import java.security.Security;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import jxl.Workbook;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.biff.File;
 import utils.*;
 
 public class Coordinador {
@@ -66,6 +72,7 @@ public class Coordinador {
 
 		Runnable serverRun = new Runnable(){
 			int idActual=0;
+			Long timeThread = null;
 			@Override
 			public void run() {
 				ServerSocket servSock = null;
@@ -77,13 +84,15 @@ public class Coordinador {
 						
 						Socket cliente = servSock.accept();
 						cliente.setSoTimeout(TIME_OUT);
-						pool.execute(new Delegado(cliente,idActual));
+						Delegado del = new Delegado(cliente,idActual);
+						pool.execute(del);
 						idActual++;
 					}
 				}catch(SocketTimeoutException e)
 				{
-					System.err.println("Ocurrio un error:");
+					System.err.println("Ocurrio un error y no se pudo atender el cliente con id:"+idActual);
 					conexionesPerdidas++;
+					//Imprimir
 					e.printStackTrace();
 				}
 				catch(Exception e){
@@ -92,7 +101,6 @@ public class Coordinador {
 				}finally{
 					try{
 						servSock.close();
-						//Imprimir en algun lado el numero de clientes no atendidos
 					}
 					catch(Exception e){
 						e.printStackTrace();

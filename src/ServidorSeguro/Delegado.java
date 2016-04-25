@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.net.Socket;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -12,6 +13,10 @@ import java.security.cert.X509Certificate;
 import javax.crypto.SecretKey;
 
 import utils.*;
+import jxl.*;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.biff.File;
 
 public class Delegado extends Thread {
 	// Constantes
@@ -33,13 +38,16 @@ public class Delegado extends Thread {
 	// Atributos
 	private Socket sc = null;
 	private String dlg;
+	private int id;
 	
 	Delegado (Socket csP, int idP) {
 		sc = csP;
 		dlg = new String("dlg " + idP + ": ");
+		id=idP;
 	}
 	
 	public void run() {
+		Long tim = System.currentTimeMillis();
 		String me = new String(STATUS+SEPARADOR+ERROR);
 		String mok = new String(STATUS+SEPARADOR+OK);
 		String mt;
@@ -50,6 +58,13 @@ public class Delegado extends Thread {
 
 				PrintWriter ac = new PrintWriter(sc.getOutputStream() , true);
 				BufferedReader dc = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+				//Se crea el libro Excel
+				WritableWorkbook workbookwrite = Workbook.createWorkbook(new java.io.File("docs/Data4.xls"));
+				 
+				//Se crea una nueva hoja dentro del libro
+				WritableSheet sheet = workbookwrite.createSheet("HojaEjemplo", 0);
+				 
+				//Creamos celdas de varios tipos
 
 				/***** Fase 1: Inicio *****/
 				linea = dc.readLine();
@@ -134,7 +149,8 @@ public class Delegado extends Thread {
 				//---------------------medidores de tiempo------------------------
 				timFinCert = System.currentTimeMillis();
 				timIniCert-=timFinCert;
-				
+
+				sheet.addCell(new jxl.write.Number(id, 0, timIniCert));
 
 				/***** Fase 5: Envia llave simetrica *****/
 				SecretKey simetrica = Seguridad.kgg(algoritmos[1]);
@@ -184,8 +200,15 @@ public class Delegado extends Thread {
 				}
 				timFinACT = System.currentTimeMillis();
 				timIniACT -= timFinACT;
+				sheet.addCell(new jxl.write.Number(id, 1, timIniACT));
+				
 		        sc.close();
 		        System.out.println(dlg + "Termino exitosamente.");
+
+		        Long timTotal = System.currentTimeMillis();
+		        timTotal-=tim;
+				Long timeReal = ManagementFactory.getThreadMXBean().getThreadCpuTime(this.getId());
+				//IMPRIMIR EN CSV
 				
 	        } catch (Exception e) {
 	          e.printStackTrace();
