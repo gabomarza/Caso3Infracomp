@@ -45,19 +45,9 @@ public class Coordinador {
 	 */
 	public static void main(String[] args) throws Exception{
 		// TODO Auto-generated method stub
-
-		System.out.println(MAESTRO + "Establezca puerto de conexion:");
-		InputStreamReader isr = new InputStreamReader(System.in);
-		BufferedReader br = new BufferedReader(isr);
-		int ip = Integer.parseInt(br.readLine());
-		System.out.println(MAESTRO + "Empezando servidor maestro en puerto " + ip);
 		// Adiciona la libreria como un proveedor de seguridad.
 		// Necesario para crear llaves.
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());		
-
-		// Crea el socket que escucha en el puerto seleccionado.
-		ss = new ServerSocket(ip);
-		System.out.println(MAESTRO + "Socket creado.");
 
 		keyPairServidor = Seguridad.grsa();
 		certSer = Seguridad.gc(keyPairServidor);
@@ -71,17 +61,18 @@ public class Coordinador {
 		final ExecutorService pool = Executors.newFixedThreadPool(N_THREADS);
 
 		Runnable serverRun = new Runnable(){
-			int idActual=0;
-			Long timeThread = null;
+
 			@Override
-			public void run() {
+			public void run() {			
+				int idActual=0;
+				Long timeThread = null;
 				ServerSocket servSock = null;
 				int conexionesPerdidas=0;
 				try{
-					servSock = ss;
+					servSock = new ServerSocket(PUERTO);
 					System.out.println("Listo para aceptar conexiones.");
 					while(true){
-						
+
 						Socket cliente = servSock.accept();
 						cliente.setSoTimeout(TIME_OUT);
 						Delegado del = new Delegado(cliente,idActual);
