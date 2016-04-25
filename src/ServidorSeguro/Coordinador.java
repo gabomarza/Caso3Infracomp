@@ -10,6 +10,7 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import utils.*;
 
 public class Coordinador {
 
@@ -79,6 +80,7 @@ public class Coordinador {
 				@Override
 				public void run() {
 					ServerSocket servSock = null;
+					int conexionesPerdidas=0;
 					try{
 						servSock = new ServerSocket(PUERTO);
 						System.out.println("BRE IM READY 4 ANYTHING");
@@ -91,6 +93,8 @@ public class Coordinador {
 						}
 					}catch(Exception e){
 						System.err.println("Ocurrio un error dado a continuacion");
+						//NI IDEA SI SI SON ESTAS
+						//conexionesPerdidas++;
 						e.printStackTrace();
 					}finally{
 						try{

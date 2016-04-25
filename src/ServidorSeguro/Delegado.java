@@ -8,9 +8,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Date;
-
 import javax.crypto.SecretKey;
+import utils.*;
 
 public class Delegado extends Thread {
 	// Constantes
@@ -88,59 +87,47 @@ public class Delegado extends Thread {
 				ac.println(mok);
 
 				/***** Fase 3: Recibe certificado del cliente *****/
-				Long tempTotalCert = null;
-				Long tempFinCert = null;
-				Long tempIniCert = System.currentTimeMillis();
+
+				Long timFinCert = null;
+				Long timIniCert = System.currentTimeMillis();
+				linea = dc.readLine();
+				mt = new String(CERCLNT + SEPARADOR);
+				if (!(linea.equals(mt))) {
+					ac.println(me);
+					sc.close();
+					throw new Exception(dlg + ERRORPRT + "CERCLNT." + REC + linea + "-terminando.");
+				}
+				System.out.println(dlg + REC + mt + "-continuando.");
+				int offset = 0;
+				byte[] certificadoServidorBytes = new byte[520];
+				int numBytesLeidos = sc.getInputStream().read(certificadoServidorBytes,offset,520-offset);
+				if (numBytesLeidos<=0) {
+					ac.println(me);
+					sc.close();
+					throw new Exception(dlg + "Error recibiendo certificado. terminando.");					
+				}
+				CertificateFactory creador = CertificateFactory.getInstance("X.509");
+				InputStream in = new ByteArrayInputStream(certificadoServidorBytes);
+				X509Certificate certificadoCliente = (X509Certificate)creador.generateCertificate(in);
+				System.out.println(dlg + "recibio certificado del cliente. continuando.");
 				
-				Thread threCerty = new Thread(){
-		            public void run(){
-		            	
-		            	linea = dc.readLine();
-						mt = new String(CERCLNT + SEPARADOR);
-						if (!(linea.equals(mt))) {
-							ac.println(me);
-							sc.close();
-							throw new Exception(dlg + ERRORPRT + "CERCLNT." + REC + linea + "-terminando.");
-						}
-						System.out.println(dlg + REC + mt + "-continuando.");
-						int offset = 0;
-						byte[] certificadoServidorBytes = new byte[520];
-						int numBytesLeidos = sc.getInputStream().read(certificadoServidorBytes,offset,520-offset);
-						if (numBytesLeidos<=0) {
-							ac.println(me);
-							sc.close();
-							throw new Exception(dlg + "Error recibiendo certificado. terminando.");					
-						}
-						CertificateFactory creador = CertificateFactory.getInstance("X.509");
-						InputStream in = new ByteArrayInputStream(certificadoServidorBytes);
-						X509Certificate certificadoCliente = (X509Certificate)creador.generateCertificate(in);
-						System.out.println(dlg + "recibio certificado del cliente. continuando.");
-						
-						/***** Fase 4: Envia certificado del servidor *****/
-						mt= new String(CERTSRV + SEPARADOR);
-						ac.println(mt);
-						byte[] mybyte = Coordinador.certSer.getEncoded( );
-						sc.getOutputStream( ).write( mybyte );
-						sc.getOutputStream( ).flush( );
-						System.out.println(dlg + "envio certificado del servidor. continuando.");
-						linea = dc.readLine();
-						if (!(linea.equals(mok))) {
-							ac.println(me);
-							throw new Exception(dlg + ERRORPRT + REC + linea + "-terminando.");
-						}
-						System.out.println(dlg + "recibio-" + linea + "-continuando.");
-		            }
-		        };
+				/***** Fase 4: Envia certificado del servidor *****/
+				mt= new String(CERTSRV + SEPARADOR);
+				ac.println(mt);
+				byte[] mybyte = Coordinador.certSer.getEncoded( );
+				sc.getOutputStream( ).write( mybyte );
+				sc.getOutputStream( ).flush( );
+				System.out.println(dlg + "envio certificado del servidor. continuando.");
+				linea = dc.readLine();
+				if (!(linea.equals(mok))) {
+					ac.println(me);
+					throw new Exception(dlg + ERRORPRT + REC + linea + "-terminando.");
+				}
+				System.out.println(dlg + "recibio-" + linea + "-continuando.");
+				timFinCert = System.currentTimeMillis();
+				timIniCert-=timFinCert;
 				
-				
-				
-				tempFinCert = System.currentTimeMillis();
-				tempTotalCert=tempIniCert-tempFinCert;
-				
-				System.out.println(tempTotalCert);
-				
-				//IMPRIMIR COSA EN EL ARCHIVO DE GUARDADO DE DATOS
-				
+
 				/***** Fase 5: Envia llave simetrica *****/
 				SecretKey simetrica = Seguridad.kgg(algoritmos[1]);
 				byte [ ] ciphertext1 = Seguridad.ae(simetrica.getEncoded(), 
