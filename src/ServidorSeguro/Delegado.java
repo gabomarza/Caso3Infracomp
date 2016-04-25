@@ -8,11 +8,14 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
 import javax.crypto.SecretKey;
+
 import utils.*;
 
 public class Delegado extends Thread {
 	// Constantes
+	public static final String MAESTRO = "MAESTRO";
 	public static final String STATUS = "ESTADO";
 	public static final String OK = "OK";
 	public static final String ALGORITMOS = "ALGORITMOS";
@@ -41,6 +44,7 @@ public class Delegado extends Thread {
 		String mok = new String(STATUS+SEPARADOR+OK);
 		String mt;
 		String linea;
+		System.out.println(MAESTRO + "Cliente " + dlg + " aceptado.");
 	    System.out.println(dlg + "Empezando atencion.");
 	        try {
 
@@ -88,6 +92,8 @@ public class Delegado extends Thread {
 
 				/***** Fase 3: Recibe certificado del cliente *****/
 
+
+				//---------------------medidores de tiempo------------------------
 				Long timFinCert = null;
 				Long timIniCert = System.currentTimeMillis();
 				linea = dc.readLine();
@@ -124,6 +130,8 @@ public class Delegado extends Thread {
 					throw new Exception(dlg + ERRORPRT + REC + linea + "-terminando.");
 				}
 				System.out.println(dlg + "recibio-" + linea + "-continuando.");
+				
+				//---------------------medidores de tiempo------------------------
 				timFinCert = System.currentTimeMillis();
 				timIniCert-=timFinCert;
 				
@@ -146,6 +154,9 @@ public class Delegado extends Thread {
 				ac.println(mok);
 				
 				/***** Fase 7: Actualizacion del agente *****/
+				Long timFinACT = null;
+				Long timIniACT = System.currentTimeMillis();
+				
 				linea = dc.readLine();
 				if (!(linea.contains(SEPARADOR) && linea.split(SEPARADOR)[0].equals("ACT1"))) {
 					ac.println(me);
@@ -171,6 +182,8 @@ public class Delegado extends Thread {
 					ac.println(me);
 					throw new Exception(dlg + "Error en verificacion de integridad. -terminando.");
 				}
+				timFinACT = System.currentTimeMillis();
+				timIniACT -= timFinACT;
 		        sc.close();
 		        System.out.println(dlg + "Termino exitosamente.");
 				
