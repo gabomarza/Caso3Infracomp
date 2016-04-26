@@ -13,11 +13,14 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.io.File;
+import java.io.FileWriter;
+
+import com.csvreader.CsvWriter;
 
 import jxl.Workbook;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
-import jxl.write.biff.File;
 import utils.*;
 
 public class Coordinador {
@@ -59,7 +62,8 @@ public class Coordinador {
 	 */
 	public void iniciarCom() {
 		final ExecutorService pool = Executors.newFixedThreadPool(N_THREADS);
-
+		final String archivoFinal = "C:/Users/Eduardo/git/Caso3Infracomp/docs/datos.csv";
+		final boolean yaExiste = new File(archivoFinal).exists();
 		Runnable serverRun = new Runnable(){
 
 			@Override
@@ -77,6 +81,22 @@ public class Coordinador {
 						cliente.setSoTimeout(TIME_OUT);
 						Delegado del = new Delegado(cliente,idActual);
 						pool.execute(del);
+						CsvWriter csvFinal = new CsvWriter(new FileWriter(archivoFinal,true), ',');
+						//Si el archivo no existe, se le crean los headers
+						if(!yaExiste)
+						{
+							csvFinal.write("id usuario");
+							csvFinal.write("tiempo de execucion");
+							csvFinal.write("conexiones perdidas");
+							csvFinal.endRecord();
+						}
+						
+						//si ya existe, solo se le agregan mas datos
+						csvFinal.write(""+idActual);
+						csvFinal.write(""+timeThread);
+						csvFinal.write(""+conexionesPerdidas);
+						csvFinal.endRecord();
+						csvFinal.close();
 						idActual++;
 					}
 				}catch(SocketTimeoutException e)
@@ -85,6 +105,9 @@ public class Coordinador {
 					conexionesPerdidas++;
 					//Imprimir
 					e.printStackTrace();
+				}
+				catch (IOException e) {
+					System.err.println("Ocurrio un error al escribir el csv " + e.getMessage());
 				}
 				catch(Exception e){
 					System.err.println("Ocurrio un error:");
