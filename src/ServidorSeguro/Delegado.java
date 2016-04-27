@@ -73,13 +73,7 @@ public class Delegado extends Thread {
 					csv.endRecord();
 				}
 				csv.write(""+id);
-				//Se crea el libro Excel
-				//WritableWorkbook workbookwrite = Workbook.createWorkbook(new java.io.File("docs/Data4.xls"));
-				 
-				//Se crea una nueva hoja dentro del libro
-				//WritableSheet sheet = workbookwrite.createSheet("HojaEjemplo", 0);
-				 
-				//Creamos celdas de varios tipos
+				
 
 				/***** Fase 1: Inicio *****/
 				linea = dc.readLine();
@@ -161,11 +155,10 @@ public class Delegado extends Thread {
 				}
 				System.out.println(dlg + "recibio-" + linea + "-continuando.");
 				
-				//---------------------medidores de tiempo------------------------
+				//---------------------medidores de tiempo e impresion de datos------------------------
 				timFinCert = System.currentTimeMillis();
 				timFinCert-=timIniCert;
 				csv.write(""+timFinCert);
-				//sheet.addCell(new jxl.write.Number(id, 0, timIniCert));
 				
 				/***** Fase 5: Envia llave simetrica *****/
 				SecretKey simetrica = Seguridad.kgg(algoritmos[1]);
@@ -213,13 +206,15 @@ public class Delegado extends Thread {
 					ac.println(me);
 					throw new Exception(dlg + "Error en verificacion de integridad. -terminando.");
 				}
+				//-------------------Medidores de tiempo e impresion de datos-------------------------
 				timFinACT = System.currentTimeMillis();
 				timFinACT -= timIniACT;
-				//sheet.addCell(new jxl.write.Number(id, 1, timIniACT));
 				csv.write(""+timFinACT);
+				
 		        sc.close();
 		        System.out.println(dlg + "Termino exitosamente.");
 
+				//-------------------Medidores de tiempo e impresion de datos-------------------------
 		        Long timTotal = System.currentTimeMillis();
 		        timTotal-=tim;
 				csv.write(""+timTotal);

@@ -113,6 +113,13 @@ public class AppAgenteSINS {
 		
 
 	}
+	
+	public AppAgenteSINS(boolean stat)
+	{
+		estado=stat;
+		
+
+	}
 
 	public static void main(String[] args) {
 
@@ -352,7 +359,6 @@ public class AppAgenteSINS {
 	 */
 	public void manejoPosicion()
 	{
-		byte [] cipheredText;
 		posicion = "41 24.2028, 2 10.4418";
 		try{
 			System.out.println(posicion);

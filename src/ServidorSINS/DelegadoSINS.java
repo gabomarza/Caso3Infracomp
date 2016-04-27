@@ -2,17 +2,25 @@ package ServidorSINS;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.net.Socket;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
 import javax.crypto.SecretKey;
+
+import com.csvreader.CsvWriter;
+
 import utils.*;
 
 public class DelegadoSINS extends Thread {
 	// Constantes
+	public static final String MAESTRO = "MAESTRO";
 	public static final String STATUS = "ESTADO";
 	public static final String OK = "OK";
 	public static final String ALGORITMOS = "ALGORITMOS";
@@ -30,22 +38,39 @@ public class DelegadoSINS extends Thread {
 	// Atributos
 	private Socket sc = null;
 	private String dlg;
+	private int id;
 	
 	DelegadoSINS (Socket csP, int idP) {
 		sc = csP;
 		dlg = new String("dlg " + idP + ": ");
+		id=idP;
 	}
 	
 	public void run() {
+		Long tim = System.currentTimeMillis();
 		String me = new String(STATUS+SEPARADOR+ERROR);
 		String mok = new String(STATUS+SEPARADOR+OK);
 		String mt;
 		String linea;
+		System.out.println(MAESTRO + "Cliente " + dlg + " aceptado.");
 	    System.out.println(dlg + "Empezando atencion.");
+	    String archivo = "C:/Users/Eduardo/git/Caso3Infracomp/docs/datos.csv";
+	    boolean yaExiste = new File(archivo).exists();
 	        try {
 
+	        	CsvWriter csv = new CsvWriter(new FileWriter(archivo,true), ',');
 				PrintWriter ac = new PrintWriter(sc.getOutputStream() , true);
 				BufferedReader dc = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+				if(!yaExiste)
+				{
+					csv.write("ID usuario");
+					csv.write("Tiempo creacion de certificado");
+					csv.write("Tiempo ACT");
+					csv.write("Tiempo Total");
+					csv.write("Tiempo Real");
+					csv.endRecord();
+				}
+				csv.write(""+id);
 
 				/***** Fase 1: Inicio *****/
 				linea = dc.readLine();
@@ -87,6 +112,11 @@ public class DelegadoSINS extends Thread {
 				ac.println(mok);
 
 				/***** Fase 3: Recibe certificado del cliente *****/
+				
+				//---------------------medidores de tiempo------------------------
+				Long timFinCert = null;
+				Long timIniCert = System.currentTimeMillis();
+				
 				linea = dc.readLine();
 				mt = new String(CERCLNT + SEPARADOR);
 				if (!(linea.equals(mt))) {
@@ -121,7 +151,12 @@ public class DelegadoSINS extends Thread {
 					throw new Exception(dlg + ERRORPRT + REC + linea + "-terminando.");
 				}
 				System.out.println(dlg + "recibio-" + linea + "-continuando.");
-
+				
+				//-------------------Medidores de tiempo e impresion de datos-------------------------
+				timFinCert = System.currentTimeMillis();
+				timFinCert-=timIniCert;
+				csv.write(""+timFinCert);
+				
 				/***** Fase 5: Envia llave simetrica *****/
 				
 				ac.println("DATA");
@@ -136,6 +171,11 @@ public class DelegadoSINS extends Thread {
 				ac.println(mok);
 				
 				/***** Fase 7: Actualizacion del agente *****/
+
+				//-------------------Medidores de tiempo e impresion de datos-------------------------
+				Long timFinACT = null;
+				Long timIniACT = System.currentTimeMillis();
+				
 				linea = dc.readLine();
 				if (!linea.equals("ACT1")) {
 					ac.println(me);
@@ -155,8 +195,23 @@ public class DelegadoSINS extends Thread {
 					ac.println(me);
 					throw new Exception(dlg + "Error en verificacion de integridad. -terminando.");
 				}
+
+				//-------------------Medidores de tiempo e impresion de datos-------------------------
+				timFinACT = System.currentTimeMillis();
+				timFinACT -= timIniACT;
+				csv.write(""+timFinACT);
+				
 		        sc.close();
 		        System.out.println(dlg + "Termino exitosamente.");
+				
+		        //-------------------Medidores de tiempo e impresion de datos-------------------------
+		        Long timTotal = System.currentTimeMillis();
+		        timTotal-=tim;
+				csv.write(""+timTotal);
+				Long timeReal = ManagementFactory.getThreadMXBean().getThreadCpuTime(this.getId());
+				csv.write(""+timeReal);
+				csv.endRecord();
+				csv.close();
 				
 	        } catch (Exception e) {
 	          e.printStackTrace();

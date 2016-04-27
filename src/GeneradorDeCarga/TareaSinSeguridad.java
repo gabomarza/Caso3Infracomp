@@ -1,13 +1,13 @@
 package GeneradorDeCarga;
 
-import Ejecucion.AppAgente;
+import Ejecucion.AppAgenteSINS;
 import uniandes.gload.core.Task;
 
-public class TareaConSeguridad extends Task{
+public class TareaSinSeguridad extends Task{
 
 	public void execute() {
 			
-		    AppAgente c= new AppAgente(true);
+		    AppAgenteSINS c= new AppAgenteSINS(true);
 		    System.out.println("Esta es la consola");
 		    
 				c.inicializar();

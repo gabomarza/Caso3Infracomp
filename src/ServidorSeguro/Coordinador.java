@@ -67,11 +67,8 @@ public class Coordinador {
 			@Override
 			public void run() {			
 				int idActual=0;
-				Long timeThread = null;
 				ServerSocket servSock = null;
 				int conexionesPerdidas=0;
-				String archivoFallas = "C:/Users/Eduardo/git/Caso3Infracomp/docs/datosFallas.csv";
-				boolean yaExiste = new File(archivoFallas).exists();
 				try{
 					servSock = new ServerSocket(PUERTO);
 					System.out.println("Listo para aceptar conexiones.");
@@ -81,27 +78,15 @@ public class Coordinador {
 						Delegado del = new Delegado(cliente,idActual);
 						pool.execute(del);
 						idActual++;
+						System.out.println("El numero de clientes no atendidos actual es:"+conexionesPerdidas);
 					}
-						CsvWriter csvFallas = new CsvWriter(new FileWriter(archivoFallas,true), ',');
-						//Si el archivo no existe, se le crean los headers
-						if(!yaExiste)
-						{
-							csvFallas.write("id usuario");
-							csvFallas.write("conexiones perdidas");
-							csvFallas.endRecord();
-						}
-						if(conexionesPerdidas != 0){
-						csvFallas.write(""+idActual);
-						csvFallas.write(""+conexionesPerdidas);
-						csvFallas.endRecord();
-						csvFallas.close();
-						}
 					
 				}
 				catch(SocketTimeoutException e)
 				{
 					System.err.println("Ocurrio un error y no se pudo atender el cliente con id:"+idActual);
 					conexionesPerdidas++;
+					System.out.println("El numero de clientes no atendidos subio a:"+conexionesPerdidas);
 					e.printStackTrace();
 				}
 				catch (IOException e) {
