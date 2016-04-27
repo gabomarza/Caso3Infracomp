@@ -134,7 +134,7 @@ public class AppAgente {
 			//java -jar servidorIC20161/servidorNSIC20161(dependiendo de cual servidor se quiere correr).jar
 			//Luego se da el puerto al cual se quiere que se conecte, que en este caso es el 1234
 			//Conecciones al servidor y buffreaders y printwriter stuff
-			socServ = new Socket("0", 8080);
+			socServ = new Socket(DIRECCIONIP, 1234);
 			escritor = new PrintWriter(socServ.getOutputStream(), true);
 			lector = new BufferedReader(new InputStreamReader( socServ.getInputStream()));
 			//Creacion de las llaves asimetricas del cliente

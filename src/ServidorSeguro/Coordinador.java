@@ -32,7 +32,7 @@ public class Coordinador {
 	/**
 	 * Puerto en el cual escucha el servidor.
 	 */
-	public static final int PUERTO = 8080;
+	public static final int PUERTO = 1234;
 
 	/**
 	 * Numero de threads a correr en el servidor
@@ -42,7 +42,7 @@ public class Coordinador {
 	/**
 	 * Tiempo que va a esperar un thread para cliente antes de ser cerrado por inactividad
 	 */
-	public static final int TIME_OUT=10000;
+	public static final int TIME_OUT=500;
 	/**
 	 * @param args
 	 */
