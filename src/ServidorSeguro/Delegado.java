@@ -9,14 +9,17 @@ import java.lang.management.ManagementFactory;
 import java.net.Socket;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.io.File;
+import java.io.FileWriter;
 
 import javax.crypto.SecretKey;
+
+import com.csvreader.CsvWriter;
 
 import utils.*;
 import jxl.*;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
-import jxl.write.biff.File;
 
 public class Delegado extends Thread {
 	// Constantes
@@ -54,15 +57,27 @@ public class Delegado extends Thread {
 		String linea;
 		System.out.println(MAESTRO + "Cliente " + dlg + " aceptado.");
 	    System.out.println(dlg + "Empezando atencion.");
+	    String archivo = "C:/Users/Eduardo/git/Caso3Infracomp/docs/datos.csv";
+	    boolean yaExiste = new File(archivo).exists();
 	        try {
-
+	        	CsvWriter csv = new CsvWriter(new FileWriter(archivo,true), ',');
 				PrintWriter ac = new PrintWriter(sc.getOutputStream() , true);
 				BufferedReader dc = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+				if(!yaExiste)
+				{
+					csv.write("ID usuario");
+					csv.write("Tiempo creacion de certificado");
+					csv.write("Tiempo ACT");
+					csv.write("Tiempo Total");
+					csv.write("Tiempo Real");
+					csv.endRecord();
+				}
+				csv.write(""+id);
 				//Se crea el libro Excel
-				WritableWorkbook workbookwrite = Workbook.createWorkbook(new java.io.File("docs/Data4.xls"));
+				//WritableWorkbook workbookwrite = Workbook.createWorkbook(new java.io.File("docs/Data4.xls"));
 				 
 				//Se crea una nueva hoja dentro del libro
-				WritableSheet sheet = workbookwrite.createSheet("HojaEjemplo", 0);
+				//WritableSheet sheet = workbookwrite.createSheet("HojaEjemplo", 0);
 				 
 				//Creamos celdas de varios tipos
 
@@ -148,10 +163,10 @@ public class Delegado extends Thread {
 				
 				//---------------------medidores de tiempo------------------------
 				timFinCert = System.currentTimeMillis();
-				timIniCert-=timFinCert;
-
-				sheet.addCell(new jxl.write.Number(id, 0, timIniCert));
-
+				timFinCert-=timIniCert;
+				csv.write(""+timFinCert);
+				//sheet.addCell(new jxl.write.Number(id, 0, timIniCert));
+				
 				/***** Fase 5: Envia llave simetrica *****/
 				SecretKey simetrica = Seguridad.kgg(algoritmos[1]);
 				byte [ ] ciphertext1 = Seguridad.ae(simetrica.getEncoded(), 
@@ -199,17 +214,20 @@ public class Delegado extends Thread {
 					throw new Exception(dlg + "Error en verificacion de integridad. -terminando.");
 				}
 				timFinACT = System.currentTimeMillis();
-				timIniACT -= timFinACT;
-				sheet.addCell(new jxl.write.Number(id, 1, timIniACT));
-				
+				timFinACT -= timIniACT;
+				//sheet.addCell(new jxl.write.Number(id, 1, timIniACT));
+				csv.write(""+timFinACT);
 		        sc.close();
 		        System.out.println(dlg + "Termino exitosamente.");
 
 		        Long timTotal = System.currentTimeMillis();
 		        timTotal-=tim;
+				csv.write(""+timTotal);
 				Long timeReal = ManagementFactory.getThreadMXBean().getThreadCpuTime(this.getId());
 				//IMPRIMIR EN CSV
-				
+				csv.write(""+timeReal);
+				csv.endRecord();
+				csv.close();
 	        } catch (Exception e) {
 	          e.printStackTrace();
 	        }

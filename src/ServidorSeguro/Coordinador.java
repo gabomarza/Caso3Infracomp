@@ -62,8 +62,6 @@ public class Coordinador {
 	 */
 	public void iniciarCom() {
 		final ExecutorService pool = Executors.newFixedThreadPool(N_THREADS);
-		final String archivoFinal = "C:/Users/Eduardo/git/Caso3Infracomp/docs/datos.csv";
-		final boolean yaExiste = new File(archivoFinal).exists();
 		Runnable serverRun = new Runnable(){
 
 			@Override
@@ -81,29 +79,33 @@ public class Coordinador {
 						cliente.setSoTimeout(TIME_OUT);
 						Delegado del = new Delegado(cliente,idActual);
 						pool.execute(del);
-						CsvWriter csvFinal = new CsvWriter(new FileWriter(archivoFinal,true), ',');
-						//Si el archivo no existe, se le crean los headers
-						if(!yaExiste)
-						{
-							csvFinal.write("id usuario");
-							csvFinal.write("tiempo de execucion");
-							csvFinal.write("conexiones perdidas");
-							csvFinal.endRecord();
-						}
-						
-						//si ya existe, solo se le agregan mas datos
-						csvFinal.write(""+idActual);
-						csvFinal.write(""+timeThread);
-						csvFinal.write(""+conexionesPerdidas);
-						csvFinal.endRecord();
-						csvFinal.close();
 						idActual++;
 					}
 				}catch(SocketTimeoutException e)
 				{
 					System.err.println("Ocurrio un error y no se pudo atender el cliente con id:"+idActual);
 					conexionesPerdidas++;
+					String archivoFallas = "C:/Users/Eduardo/git/Caso3Infracomp/docs/datosFallas.csv";
+					boolean yaExiste = new File(archivoFallas).exists();
+					try{
+					CsvWriter csvFallas = new CsvWriter(new FileWriter(archivoFallas,true), ',');
+					//Si el archivo no existe, se le crean los headers
+					if(!yaExiste)
+					{
+						csvFallas.write("id usuario");
+						csvFallas.write("conexiones perdidas");
+						csvFallas.endRecord();
+					}
+					csvFallas.write(""+idActual);
+					csvFallas.write(""+conexionesPerdidas);
+					csvFallas.endRecord();
+					csvFallas.close();
 					//Imprimir
+					}catch(IOException f)
+					{
+						System.err.println("Ocurrio un error al escribir el csv de fallas" + f.getMessage());
+					}
+					
 					e.printStackTrace();
 				}
 				catch (IOException e) {
