@@ -224,7 +224,6 @@ public class Delegado extends Thread {
 		        timTotal-=tim;
 				csv.write(""+timTotal);
 				Long timeReal = ManagementFactory.getThreadMXBean().getThreadCpuTime(this.getId());
-				//IMPRIMIR EN CSV
 				csv.write(""+timeReal);
 				csv.endRecord();
 				csv.close();
