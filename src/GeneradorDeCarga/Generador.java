@@ -27,7 +27,7 @@ public class Generador
 	 */
 	private Task crearTarea()
 	{
-		return null;
+		return new TareaConSeguridad();
 	}
 	
 	/**

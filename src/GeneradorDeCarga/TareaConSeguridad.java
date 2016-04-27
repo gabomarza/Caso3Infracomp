@@ -3,7 +3,7 @@ package GeneradorDeCarga;
 import Ejecucion.AppAgente;
 import uniandes.gload.core.Task;
 
-public class Tarea extends Task{
+public class TareaConSeguridad extends Task{
 
 	public void execute() {
 			
