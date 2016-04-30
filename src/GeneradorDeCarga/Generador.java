@@ -16,8 +16,8 @@ public class Generador
 	public Generador()
 	{
 		Task tarea = crearTarea();
-		int numTareas = 100;
-		int tiempoEntreTareas = 1000;
+		int numTareas = 80;
+		int tiempoEntreTareas = 100;
 		generador = new LoadGenerator("Prueba", numTareas, tarea, tiempoEntreTareas);
 		generador.generate();
 	}

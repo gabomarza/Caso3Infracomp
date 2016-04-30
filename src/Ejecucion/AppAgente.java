@@ -64,7 +64,7 @@ public class AppAgente {
 	/**
 	 * Cambiarla cada vez que se cambie de computador
 	 */
-	public static final String DIRECCIONIP ="157.253.228.34";
+	public static final String DIRECCIONIP ="192.168.0.7";
 	private SecretKeySpec desKey;
 	private KeyPair keyPair;
 	private String mensActuRes;
